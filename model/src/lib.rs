@@ -1,3 +1,6 @@
+
+pub mod board;
+
 #[cfg(test)]
 mod tests {
 	#[test]
