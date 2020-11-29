@@ -82,9 +82,9 @@ mod tests {
 	use super::*;
 	use std::any::Any;
 
-    fn is<T: 'static>(obj: &dyn Any) -> bool {
-        obj.is::<T>()
-    }
+	fn is<T: 'static>(obj: &dyn Any) -> bool {
+		obj.is::<T>()
+	}
 
 	#[test]
 	fn new() {
@@ -94,107 +94,101 @@ mod tests {
 
 	#[test]
 	fn with_element() {
-	    const ELEMENT : char = 'a';
+		const ELEMENT: char = 'a';
 		let cut = Space::with_element(ELEMENT);
 		assert!(cut.element.is_some());
 		assert!(is::<char>(&cut.element.unwrap()));
 		assert_eq!(cut.element.unwrap(), ELEMENT);
 	}
 
-    #[test]
-    fn element() {
+	#[test]
+	fn element() {
+		// test with None
+		let element = None;
+		let cut = Space::<u8> { element };
+		assert_eq!(cut.element(), &element);
 
-        // test with None
-        let element = None;
-        let cut = Space::<u8> {element};
-        assert_eq!(cut.element(), &element);
+		// test with a value
+		let element = Some(5);
+		let cut = Space { element };
+		assert_eq!(cut.element(), &element);
+	}
 
-        // test with a value
-        let element = Some(5);
-        let cut = Space {element};
-        assert_eq!(cut.element(), &element);
-    }
+	#[test]
+	fn is_empty() {
+		// test true
+		let cut = Space::<u8> { element: None };
+		assert!(cut.is_empty());
 
-    #[test]
-    fn is_empty() {
+		// test false
+		let element = Some(5);
+		let cut = Space { element };
+		assert!(!cut.is_empty());
+	}
 
-        // test true
-        let cut = Space::<u8> {element: None};
-        assert!(cut.is_empty());
+	#[test]
+	fn has_element() {
+		// test truth
+		let element = Some(5);
+		let cut = Space { element };
+		assert!(cut.has_element());
 
-        // test false
-        let element = Some(5);
-        let cut = Space {element};
-        assert!(!cut.is_empty());
-    }
+		// test falsity
+		let cut = Space::<u8> { element: None };
+		assert!(!cut.has_element());
+	}
 
-    #[test]
-    fn has_element() {
+	#[test]
+	fn set_optional_element() {
+		// test with None
+		let mut cut = Space::new();
+		let element = None;
+		cut.set_optional_element(element);
+		assert_eq!(cut.element, element);
 
-        // test truth
-        let element = Some(5);
-        let cut = Space {element};
-        assert!(cut.has_element());
+		// test with 5
+		let element = Some(5);
+		cut.set_optional_element(element);
+		assert_eq!(cut.element, element);
+	}
 
-        // test falsity
-        let cut = Space::<u8> {element: None};
-        assert!(!cut.has_element());
-    }
+	#[test]
+	fn set_element() {
+		const ELEMENT: u8 = 5;
+		let mut cut = Space::new();
+		cut.set_element(ELEMENT);
+		assert!(cut.element.is_some());
+		assert_eq!(cut.element.unwrap(), ELEMENT);
+	}
 
-    #[test]
-    fn set_optional_element() {
+	#[test]
+	fn clear() {
+		let mut cut = Space::<u8> { element: Some(67) };
+		cut.clear();
+		assert_eq!(cut.element, None);
+	}
 
-        // test with None
-        let mut cut = Space::new();
-        let element = None;
-        cut.set_optional_element(element);
-        assert_eq!(cut.element, element);
-        
-        // test with 5
-        let element = Some(5);
-        cut.set_optional_element(element);
-        assert_eq!(cut.element, element);
-    }
+	#[test]
+	fn to_string() {
+		// test None
+		let cut = Space::<u8> { element: None };
+		assert_eq!(cut.to_string(), String::from("| |"));
 
-    #[test]
-    fn set_element() {
-        const ELEMENT : u8 = 5;
-        let mut cut = Space::new();
-        cut.set_element(ELEMENT);
-        assert!(cut.element.is_some());
-        assert_eq!(cut.element.unwrap(), ELEMENT);
-    }
+		// test 5
+		let cut = Space::<u8> { element: Some(5) };
+		assert_eq!(cut.to_string(), String::from("|5|"));
+	}
 
-    #[test]
-    fn clear() {
-        let mut cut = Space::<u8> {element: Some(67)};
-        cut.clear();
-        assert_eq!(cut.element, None);
-    }
+	#[test]
+	fn from_option() {
+		// test None
+		let element: Option<u8> = None;
+		let cut = Space::from(element);
+		assert_eq!(cut.element, element);
 
-    #[test]
-    fn to_string() {
-
-        // test None
-        let cut = Space::<u8> {element: None};
-        assert_eq!(cut.to_string(), String::from("| |"));
-
-        // test 5
-        let cut = Space::<u8> {element: Some(5)};
-        assert_eq!(cut.to_string(), String::from("|5|"));
-    }
-
-    #[test]
-    fn from_option() {
-
-        // test None
-        let element : Option<u8> = None;
-        let cut = Space::from(element);
-        assert_eq!(cut.element, element);
-
-        // test 5
-        let element = Some(5);
-        let cut = Space::from(element);
-        assert_eq!(cut.element, element);
-    }
+		// test 5
+		let element = Some(5);
+		let cut = Space::from(element);
+		assert_eq!(cut.element, element);
+	}
 }
