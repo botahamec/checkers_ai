@@ -8,6 +8,6 @@ use space::Space;
 ///
 /// * `T` - What is contained on the spaces of the board
 /// * `SIZE` - The number of rows and columns in the board
-struct Board<T, const SIZE: usize> {
+struct Board<T: Copy, const SIZE: usize> {
 	matrix: [[Space<T>; SIZE]; SIZE],
 }
