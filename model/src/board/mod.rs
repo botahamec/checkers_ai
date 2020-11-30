@@ -1,6 +1,6 @@
-mod space;
+mod spaces;
 
-use space::Space;
+use spaces::Space;
 
 /// Contains a board to play on
 ///
@@ -8,6 +8,6 @@ use space::Space;
 ///
 /// * `T` - What is contained on the spaces of the board
 /// * `SIZE` - The number of rows and columns in the board
-struct Board<T: Copy, const SIZE: usize> {
-	matrix: [[Space<T>; SIZE]; SIZE],
+struct Board<'a, T: Copy, const SIZE: usize> {
+	matrix: [[&'a dyn Space<T>; SIZE]; SIZE],
 }
