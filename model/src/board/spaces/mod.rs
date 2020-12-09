@@ -1,4 +1,3 @@
-
 mod container;
 mod empty;
 
@@ -10,7 +9,8 @@ pub use empty::EmptySpace;
 /// # Arguments
 ///
 /// - `T` - The element the Space could contain
-pub trait Space<T: Sized>{
-    fn new() -> Self where Self: Sized; 
+pub trait Space<T: Sized> {
+	fn new() -> Self
+	where
+		Self: Sized;
 }
-

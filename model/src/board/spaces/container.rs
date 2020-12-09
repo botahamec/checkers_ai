@@ -1,4 +1,4 @@
-
+use std::error::Error;
 use std::fmt;
 
 #[cfg(feature = "serde")]
@@ -6,46 +6,68 @@ use serde::{Deserialize, Serialize};
 
 use super::Space;
 
+/// There is no element at the given space
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+struct NoElementError;
+
+impl fmt::Display for NoElementError {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "The space did not have an element")
+	}
+}
+
+impl Error for NoElementError {}
+
 /// A space in a board, that may or may not contain an element
 ///
 /// # Arguments
 ///
 /// * `T` - What the space may contain
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ContainerSpace<T> {
 	element: Option<T>,
 }
 
 impl<T> Space<T> for ContainerSpace<T> {
-    /// Creates an empty space
+	/// Creates an empty space
 	fn new() -> Self {
 		ContainerSpace { element: None }
 	}
 }
 
-impl<T> ContainerSpace<T> {
+impl<T: Copy> ContainerSpace<T> {
+    /// Gets the element, or returns an error
+	pub const fn element(&self) -> Result<T, NoElementError> {
+		match self.as_option() {
+			Some(p) => Ok(*p),
+			None => Err(NoElementError),
+		}
+	}
+}
 
+impl<T> ContainerSpace<T> {
 	/// Creates a new space containing the specified element
-	pub fn with_element(element: T) -> Self {
+	pub const fn with_element(element: T) -> Self {
 		ContainerSpace {
 			element: Some(element),
 		}
 	}
 
 	/// Gets the element from the space. Returns None if the Space is empty
-	pub fn element(&self) -> &Option<T> {
+	pub const fn as_option(&self) -> &Option<T> {
 		&self.element
 	}
 
 	/// Checks if the space is empty or not
-	pub fn is_empty(&self) -> bool {
-		self.element().is_none()
+	pub const fn is_empty(&self) -> bool {
+		self.as_option().is_none()
 	}
 
 	/// True if the space contains some element
-	pub fn has_element(&self) -> bool {
-		self.element().is_some()
+	pub const fn has_element(&self) -> bool {
+		self.as_option().is_some()
 	}
 
 	/// Sets the element to the given piece, or clears it
@@ -68,7 +90,7 @@ impl<T: fmt::Display> fmt::Display for ContainerSpace<T> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		f.write_fmt(format_args!(
 			"|{}|",
-			match self.element() {
+			match self.as_option() {
 				Some(piece) => piece.to_string(),
 				None => String::from(" "),
 			}
@@ -93,6 +115,14 @@ mod tests {
 	}
 
 	#[test]
+	fn no_element_err_to_str() {
+		assert_eq!(
+			NoElementError.to_string(),
+			"The space did not have an element"
+		);
+	}
+
+	#[test]
 	fn new() {
 		let cut = ContainerSpace::<u8>::new();
 		assert_eq!(cut.element, None);
@@ -108,16 +138,31 @@ mod tests {
 	}
 
 	#[test]
-	fn element() {
+	fn as_option() {
 		// test with None
 		let element = None;
 		let cut = ContainerSpace::<u8> { element };
-		assert_eq!(cut.element(), &element);
+		assert_eq!(cut.as_option(), &element);
 
 		// test with a value
 		let element = Some(5);
 		let cut = ContainerSpace { element };
-		assert_eq!(cut.element(), &element);
+		assert_eq!(cut.as_option(), &element);
+	}
+
+	#[test]
+	fn element() {
+		// test with None
+		let element = None;
+		let cut = ContainerSpace::<u8> { element };
+		assert!(cut.element().is_err());
+		assert_eq!(cut.element(), Err(NoElementError));
+
+		// test with a value
+		const VALUE: u8 = 5;
+		let cut = ContainerSpace { element: Some(VALUE) };
+		assert!(cut.element().is_ok());
+		assert_eq!(cut.element().unwrap(), VALUE);
 	}
 
 	#[test]

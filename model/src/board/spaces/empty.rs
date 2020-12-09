@@ -1,4 +1,3 @@
-
 use std::fmt;
 
 #[cfg(feature = "serde")]
@@ -12,43 +11,43 @@ use super::Space;
 pub struct EmptySpace {}
 
 impl EmptySpace {
-    fn new() -> Self {
-        EmptySpace {}
-    } 
+	fn new() -> Self {
+		EmptySpace {}
+	}
 }
 
 impl<T> Space<T> for EmptySpace {
-    /// Creates an empty space
-    fn new() -> Self {
-        EmptySpace::new()
-    }
+	/// Creates an empty space
+	fn new() -> Self {
+		EmptySpace::new()
+	}
 }
 
 impl fmt::Display for EmptySpace {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		f.write_str("| |")
-    }
+	}
 }
 
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-    use std::any::Any;
+	use super::*;
+	use std::any::Any;
 
-    fn is<T: 'static>(obj: &dyn Any) -> bool {
+	fn is<T: 'static>(obj: &dyn Any) -> bool {
 		obj.is::<T>()
 	}
 
-    #[test]
-    fn new() {
-        let cut = EmptySpace::new();
-        assert!(is::<EmptySpace>(&cut));
-    }
+	#[test]
+	fn new() {
+		let cut = EmptySpace::new();
+		assert!(is::<EmptySpace>(&cut));
+	}
 
-    #[test]
-    fn to_string() {
-        let cut = EmptySpace {};
-        assert_eq!(cut.to_string(), "| |");
-    }
+	#[test]
+	fn to_string() {
+		let cut = EmptySpace {};
+		assert_eq!(cut.to_string(), "| |");
+	}
 }
